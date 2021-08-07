@@ -13,11 +13,16 @@ class LogicGate(Enum):
     NOR = 5
     XNOR = 6
 
+
+# this enum determines tha available logic gates for the program
+# the num values have to be the same, but you can enable and disable them
+
+
 # class LogicGate(Enum):
 #     OR = 1
 #     AND = 2
 #     XOR = 3
-#     XNOR = 4
+#     NAND = 4
 
 
 class LogicGateSim:
@@ -83,18 +88,18 @@ class LogicGateSim:
             return LogicGateSim.XNOR(a, b)
 
 
-
 class Chromosome:
     def __init__(self):
         self.dna = []
         self.fitness = 0
         self.dna_length = 0  # in case this data is needed
         self.type = ""
+        self.logic_gates_available = []
 
     def initialize(self, length, type_name):
         self.type = type_name
-
         self.dna_length = length
+
         self.dna = np.random.choice(list(LogicGate), size=self.dna_length, replace=True)
 
     def initialize_with_dna(self, _dna, _type):
@@ -155,12 +160,11 @@ class Chromosome:
 
     def calculate_fitness(self, dataset: "array-like"):
         temp_fitness = 0
-        output_value = 1 # bias
+        output_value = 1  # bias
         for data in dataset:
             if self.type == "5bit":
                 for count, gene in enumerate(self.dna):
                     # applying the classifier against the dataset
-
                     if count == 0:
                         output_value = LogicGateSim.Smart(
                             gene, output_value, data.input_d[0]
@@ -203,7 +207,27 @@ class Chromosome:
                         )
                     elif count == 10:
                         output_value = LogicGateSim.Smart(
-                            gene, output_value, data.input_d[0]
+                            gene, output_value, data.input_d[3]
+                        )
+                    elif count == 11:
+                        output_value = LogicGateSim.Smart(
+                            gene, output_value, data.input_d[3]
+                        )
+                    elif count == 12:
+                        output_value = LogicGateSim.Smart(
+                            gene, output_value, data.input_d[4]
+                        )
+                    elif count == 13:
+                        output_value = LogicGateSim.Smart(
+                            gene, output_value, data.input_d[4]
+                        )
+                    elif count == 14:
+                        output_value = LogicGateSim.Smart(
+                            gene, output_value, data.input_d[2]
+                        )
+                    elif count == 15:
+                        output_value = LogicGateSim.Smart(
+                            gene, output_value, data.input_d[1]
                         )
 
                     # comparing the end result against the dataset's expected output
@@ -257,7 +281,59 @@ class Chromosome:
                         )
                     elif count == 10:
                         output_value = LogicGateSim.Smart(
+                            gene, output_value, data.input_d[1]
+                        )
+                    elif count == 11:
+                        output_value = LogicGateSim.Smart(
+                            gene, output_value, data.input_d[0]
+                        )
+                    elif count == 12:
+                        output_value = LogicGateSim.Smart(
+                            gene, output_value, data.input_d[2]
+                        )
+                    elif count == 13:
+                        output_value = LogicGateSim.Smart(
+                            gene, output_value, data.input_d[4]
+                        )
+                    elif count == 14:
+                        output_value = LogicGateSim.Smart(
+                            gene, output_value, data.input_d[5]
+                        )
+                    elif count == 15:
+                        output_value = LogicGateSim.Smart(
                             gene, output_value, data.input_d[3]
+                        )
+                    elif count == 16:
+                        output_value = LogicGateSim.Smart(
+                            gene, output_value, data.input_d[2]
+                        )
+                    elif count == 17:
+                        output_value = LogicGateSim.Smart(
+                            gene, output_value, data.input_d[0]
+                        )
+                    elif count == 18:
+                        output_value = LogicGateSim.Smart(
+                            gene, output_value, data.input_d[5]
+                        )
+                    elif count == 19:
+                        output_value = LogicGateSim.Smart(
+                            gene, output_value, data.input_d[1]
+                        )
+                    elif count == 20:
+                        output_value = LogicGateSim.Smart(
+                            gene, output_value, data.input_d[1]
+                        )
+                    elif count == 21:
+                        output_value = LogicGateSim.Smart(
+                            gene, output_value, data.input_d[5]
+                        )
+                    elif count == 22:
+                        output_value = LogicGateSim.Smart(
+                            gene, output_value, data.input_d[3]
+                        )
+                    elif count == 23:
+                        output_value = LogicGateSim.Smart(
+                            gene, output_value, data.input_d[2]
                         )
 
                     # comparing the end result against the dataset's expected output

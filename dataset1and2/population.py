@@ -14,7 +14,7 @@ class Popultion:
         _type,
         _dataset,
         _dataset_name,
-        _chromosome_len
+        _chromosome_len,
     ):
         self.mutation_rate = _mutation_rate
         self.population_size = _population_size
@@ -26,9 +26,11 @@ class Popultion:
 
         self.current_pop = []  # current population
 
-        self.current_best_chromosome = Chromosome()  # the best chromosome in the entire runtime
+        self.current_best_chromosome = (
+            Chromosome()
+        )  # the best chromosome in the entire runtime
         self.best_fitness_records = []  # best fitness of each generation
-        self.average_fitness_records = [] # average fitness of each generation
+        self.average_fitness_records = []  # average fitness of each generation
 
         self.is_finished = False
         self.current_generation = 0
@@ -75,9 +77,11 @@ class Popultion:
     def accept_reject(self):
         count = 0
         while True:
-            count+=1
+            count += 1
             potential_mate = np.random.choice(self.current_pop)
-            random_fitness_value = np.random.randint(0, self.current_best_chromosome.fitness)
+            random_fitness_value = np.random.randint(
+                0, self.current_best_chromosome.fitness
+            )
 
             if random_fitness_value < potential_mate.fitness:
                 return potential_mate
@@ -127,26 +131,27 @@ class Popultion:
         if self.perfect_score == self.current_best_chromosome.fitness:
             self.is_finished = True
 
-
     def print_details(self):
         print("current generation", self.current_generation)
-        print("best fitness records up till for entire simulation", self.current_best_chromosome.fitness)
+        print(
+            "best fitness records up till for entire simulation",
+            self.current_best_chromosome.fitness,
+        )
         print("current best classifier", self.current_best_chromosome.dna)
 
     def graph(self):
         x_axis = [x for x in range(0, self.max_generations)]
-        fig = plt.figure(figsize=(7,5))
+        fig = plt.figure(figsize=(7, 5))
         ax = fig.add_subplot()
-        plt.grid(b=True, which='major', linewidth='0.9')
-        ax.plot(x_axis, self.average_fitness_records, label='Average Fitness')
-        ax.plot(x_axis, self.best_fitness_records, label='Best Fitness')
-        ax.set_xlabel('Generations')
-        ax.set_ylabel('Fitness')
+        plt.grid(b=True, which="major", linewidth="0.9")
+        ax.plot(x_axis, self.average_fitness_records, label="Average Fitness")
+        ax.plot(x_axis, self.best_fitness_records, label="Best Fitness")
+        ax.set_xlabel("Generations")
+        ax.set_ylabel("Fitness")
         ax.set_title(self.dataset_name)
-        chart_text = f"Mutation Rate: {self.mutation_rate}\nPopulation Size: {self.population_size}\nMax Generation: {self.max_generations}\nPerfect Fitness: {self.perfect_score}\nBest Fitness: {self.current_best_chromosome.fitness}"
-        ax.text(-0.15, .99, chart_text, size=8,
-         transform=ax.transAxes, color='r')
-        ax.legend()
+        chart_text = f"Mutation Rate: {self.mutation_rate}\nPopulation Size: {self.population_size}\nMax Generation: {self.max_generations}\nPerfect Fitness: {self.perfect_score}\nBest Fitness: {self.current_best_chromosome.fitness}\nChromosome Size: {self.chromosome_len}\nCurrent Best Accuracy: {(self.current_best_chromosome.fitness / self.perfect_score) * 100}%"
+        ax.text(-0.15, 0.95, chart_text, size=8, transform=ax.transAxes, color="g")
+        ax.legend(prop={"size": 6}, loc="lower right")
         plt.show()
 
     def run_genetic_algorithm(self):
@@ -175,4 +180,3 @@ class Popultion:
         self.graph()
 
         return self.is_finished
-
