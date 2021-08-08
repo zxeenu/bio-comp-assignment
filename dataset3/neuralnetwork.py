@@ -1,7 +1,5 @@
 import matplotlib.pyplot as plt
-import nnfs
 import numpy as np
-from nnfs.datasets import spiral_data, vertical_data
 
 
 class Layer:
@@ -52,11 +50,11 @@ class ActivationSoftmax:
         ):
 
             single_output = single_output.reshape(-1, 1)
-            jacobian_matrix = np.diagflat(single_output) - np.dot(
+            temp_matrix = np.diagflat(single_output) - np.dot(
                 single_output, single_output.T
             )
 
-            self.delta_inputs[count] = np.dot(jacobian_matrix, single_output)
+            self.delta_inputs[count] = np.dot(temp_matrix, single_output)
 
 
 class Loss:
@@ -124,14 +122,11 @@ class Optimizer:
 
 
 class NeuralNetwork:
-    def __init__(
-        self, _iterations, _trainning_X, _trainning_Y, _test_Y, _learning_rate
-    ):
+    def __init__(self, _iterations, _trainning_X, _trainning_Y, _learning_rate):
         self.iterations = _iterations
         self.trainning_X = _trainning_X
         self.trainning_Y = _trainning_Y
         self.learning_rate = _learning_rate
-        self.test_Y = _test_Y
 
         self.accuracy_records_trainning = []
         self.loss_records_trainning = []
@@ -140,9 +135,9 @@ class NeuralNetwork:
         self.loss_records_test = []
 
     def train(self):
-        self.dense1 = Layer(2, 64)
+        self.dense1 = Layer(6, 64)
         self.actvation1 = ActivationRelu()
-        self.dense2 = Layer(64, 3)
+        self.dense2 = Layer(64, 6)
         self.optimizer = Optimizer(self.learning_rate)
         self.loss_and_activation_func = ActivationSoftmaxLoss()
 
@@ -185,53 +180,56 @@ class NeuralNetwork:
                     iteration_number,
                     "| " "Loss: ",
                     loss,
-                    "| " "Accuracy: ",
+                    "| " "Accuracy Percentage: ",
                     accuracy,
                 )
                 count = 0
         print("------------------")
 
-    def test(self):
-        count = 0
-        for iteration_number in range(self.iterations):
-            # forward pass
-            self.dense1.forward(self.trainning_X)
-            self.actvation1.forward(self.dense1.output)
-            self.dense2.forward(self.actvation1.output)
-            loss = self.loss_and_activation_func.forward(
-                self.dense2.output, self.trainning_Y
-            )
+    def test(self, _test_X, _test_Y):
+        self.dense1.forward(_test_X)
+        self.actvation1.forward(self.dense1.output)
+        self.dense2.forward(self.actvation1.output)
+        loss = self.loss_and_activation_func.forward(self.dense2.output, _test_Y)
 
-            predictions = np.argmax(self.loss_and_activation_func.output, axis=1)
-            if len(self.trainning_Y.shape) == 2:
-                self.trainning_Y = np.argmax(self.trainning_Y, axis=1)
-            accuracy = np.mean(predictions == self.trainning_Y)
+        predictions = np.argmax(self.loss_and_activation_func.output, axis=1)
+        if len(_test_Y.shape) == 2:
+            _test_Y = np.argmax(_test_Y, axis=1)
+        accuracy = np.mean(predictions == _test_Y)
 
-            # for graphing
-            self.accuracy_records_test.append(accuracy)
-            self.loss_records_test.append(loss)
+        accuracy_count = 0
+        for i in range(len(_test_Y)):
+            if predictions[i] == _test_Y[i]:
+                accuracy_count += 1
 
-            # backward pass
-            self.loss_and_activation_func.backward(
-                self.loss_and_activation_func.output, self.trainning_Y
-            )
-            self.dense2.backward(self.loss_and_activation_func.delta_inputs)
-            self.actvation1.backward(self.dense2.delta_inputs)
-            self.dense1.backward(self.actvation1.delta_inputs)
+        # for graphing
+        self.accuracy_records_test.append(accuracy)
+        self.loss_records_test.append(loss)
 
-            count += 1
-            if count > 100:
-                print(
-                    "Mode: Test",
-                    "| " "Iteration: ",
-                    iteration_number,
-                    "| " "Loss: ",
-                    loss,
-                    "| " "Accuracy: ",
-                    accuracy,
-                )
-                count = 0
+        # backward pass
+        self.loss_and_activation_func.backward(
+            self.loss_and_activation_func.output, _test_Y
+        )
+        self.dense2.backward(self.loss_and_activation_func.delta_inputs)
+        self.actvation1.backward(self.dense2.delta_inputs)
+        self.dense1.backward(self.actvation1.delta_inputs)
+
+        print(
+            "Mode: Test",
+            "| " "Loss: ",
+            loss,
+            "| " "Accuracy Percentage: ",
+            accuracy,
+            "| " "Accuracy Actual: ",
+            f"{accuracy_count}/{len(_test_Y)}",
+        )
         print("------------------")
+        self.temp = [
+            loss,
+            accuracy,
+            accuracy_count,
+            len(_test_Y),
+        ]  # some data for the graph
 
     def graph(self):
         fig, (ax1, ax2) = plt.subplots(2)
@@ -245,7 +243,7 @@ class NeuralNetwork:
         # ax1.set_title("Accuracy")
         ax1.grid()
         ax1.plot(x_axis, self.accuracy_records_trainning, color="g", label="Trainning")
-        ax1.plot(x_axis, self.accuracy_records_test, color="r", label="Test")
+        # ax1.plot(x_axis, self.accuracy_records_test, color="r", label="Test")
         ax1.set_xlabel("Epochs")
         ax1.set_ylabel("Accuracy")
         ax1.legend(prop={"size": 6}, loc="lower right")
@@ -253,17 +251,35 @@ class NeuralNetwork:
         # ax2.set_title("Loss")
         ax2.grid()
         ax2.plot(x_axis, self.loss_records_trainning, color="g", label="Trainning")
-        ax2.plot(x_axis, self.loss_records_test, color="r", label="Test")
+        # ax2.plot(x_axis, self.loss_records_test, color="r", label="Test")
         ax2.set_xlabel("Epochs")
         ax2.set_ylabel("Loss")
         ax2.legend(prop={"size": 6}, loc="lower right")
+        # chart_text = f"Mode: Test\nLoss: {self.temp[0]}\naccuracy: {self.temp[1]}%\nAccuracy Actual: {self.temp[2]}/{self.temp[3]}"
+        # ax1.text(-0.15, 1, chart_text, size=8, transform=ax1.transAxes, color="r")
+        ###
+        # ax3.grid()
+        # ax3.bar([1, 2, 3], [1, 10, 20], color="g", label="Test")
+        # ax3.pie(
+        #     [20, 80],
+        #     labels=["Correct", "Wrong"],
+        #     colors=["g", "r"],
+        #     autopct="%1.1f%%",
+        #     shadow=True,
+        #     startangle=140,
+        #     radius=0.95,
+        # )
+        # ax1.plot(x_axis, self.accuracy_records_test, color="r", label="Test")
+        # ax3.set_xlabel("Data Row")
+        # ax3.set_ylabel("Count")
+        # ax3.legend(prop={"size": 6}, loc="lower right")
         plt.show()
 
 
-nnfs.init()
-X, y = spiral_data(200, 3)
+# n = NeuralNetwork(500, X, y, 0.5)
+# n.train()
+# n.test(X, y)
+# n.graph()
 
-n = NeuralNetwork(1000, X, y, y, 0.5)
-n.train()
-n.test()
-n.graph()
+# print(type(X))
+# # print(y)
