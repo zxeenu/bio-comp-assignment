@@ -26,6 +26,28 @@ class ActivationLeakyRelu:
         self.delta_inputs = delta_values.copy()  # save copy for later
 
 
+class ActivationSoftmaxLoss:
+    def __init__(self):
+        self.softmax_activation = ActivationSoftmax()
+        self.loss_function = Loss()
+
+    def forward(self, inputs, y_true):
+        self.softmax_activation.forward(inputs)
+        self.output = self.softmax_activation.output
+        return self.loss_function.calculate(self.output, y_true)
+
+    def backward(self, delta_values, y_true):
+        samples_size = len(delta_values)
+
+        # account for multple types of target encoding
+        if len(y_true.shape) == 2:
+            y_true = np.argmax(y_true, axis=1)
+
+        self.delta_inputs = delta_values.copy()
+        self.delta_inputs[range(samples_size), y_true] -= 1  # calculate nudge values
+        self.delta_inputs = self.delta_inputs / samples_size
+
+
 class ActivationRelu:
     def forward(self, inputs):
         self.inputs = inputs  # save in case needed later
@@ -88,28 +110,6 @@ class Loss:
 
         negetive_log_likeliness = -np.log(correct_confidences)
         return negetive_log_likeliness
-
-
-class ActivationSoftmaxLoss:
-    def __init__(self):
-        self.softmax_activation = ActivationSoftmax()
-        self.loss_function = Loss()
-
-    def forward(self, inputs, y_true):
-        self.softmax_activation.forward(inputs)
-        self.output = self.softmax_activation.output
-        return self.loss_function.calculate(self.output, y_true)
-
-    def backward(self, delta_values, y_true):
-        samples_size = len(delta_values)
-
-        # account for multple types of target encoding
-        if len(y_true.shape) == 2:
-            y_true = np.argmax(y_true, axis=1)
-
-        self.delta_inputs = delta_values.copy()
-        self.delta_inputs[range(samples_size), y_true] -= 1  # calculate nudge values
-        self.delta_inputs = self.delta_inputs / samples_size
 
 
 class Optimizer:
@@ -187,6 +187,7 @@ class NeuralNetwork:
         print("------------------")
 
     def test(self, _test_X, _test_Y):
+        # print(self.dense1.weights.shape)
         self.dense1.forward(_test_X)
         self.actvation1.forward(self.dense1.output)
         self.dense2.forward(self.actvation1.output)
@@ -239,47 +240,14 @@ class NeuralNetwork:
         )
         x_axis = [x for x in range(0, self.iterations)]
 
-        ###
-        # ax1.set_title("Accuracy")
         ax1.grid()
         ax1.plot(x_axis, self.accuracy_records_trainning, color="g", label="Trainning")
-        # ax1.plot(x_axis, self.accuracy_records_test, color="r", label="Test")
         ax1.set_xlabel("Epochs")
         ax1.set_ylabel("Accuracy")
         ax1.legend(prop={"size": 6}, loc="lower right")
-        ###
-        # ax2.set_title("Loss")
         ax2.grid()
         ax2.plot(x_axis, self.loss_records_trainning, color="g", label="Trainning")
-        # ax2.plot(x_axis, self.loss_records_test, color="r", label="Test")
         ax2.set_xlabel("Epochs")
         ax2.set_ylabel("Loss")
         ax2.legend(prop={"size": 6}, loc="lower right")
-        # chart_text = f"Mode: Test\nLoss: {self.temp[0]}\naccuracy: {self.temp[1]}%\nAccuracy Actual: {self.temp[2]}/{self.temp[3]}"
-        # ax1.text(-0.15, 1, chart_text, size=8, transform=ax1.transAxes, color="r")
-        ###
-        # ax3.grid()
-        # ax3.bar([1, 2, 3], [1, 10, 20], color="g", label="Test")
-        # ax3.pie(
-        #     [20, 80],
-        #     labels=["Correct", "Wrong"],
-        #     colors=["g", "r"],
-        #     autopct="%1.1f%%",
-        #     shadow=True,
-        #     startangle=140,
-        #     radius=0.95,
-        # )
-        # ax1.plot(x_axis, self.accuracy_records_test, color="r", label="Test")
-        # ax3.set_xlabel("Data Row")
-        # ax3.set_ylabel("Count")
-        # ax3.legend(prop={"size": 6}, loc="lower right")
         plt.show()
-
-
-# n = NeuralNetwork(500, X, y, 0.5)
-# n.train()
-# n.test(X, y)
-# n.graph()
-
-# print(type(X))
-# # print(y)

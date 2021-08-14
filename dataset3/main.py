@@ -34,18 +34,19 @@ for num in range(0, dataset3_len):
 
 
 ### Variables for Neural Network
-slice_point = 1400  # 70% for trainning, 30% for testing
-LEARNING_RATE = 0.5
-EPOCHS = 500
+SLICE_POINT = 1400  # 70% for trainning, 30% for testing
+LEARNING_RATE = 0.8
+EPOCHS = 800
 
-trainning_data_X = np.array(dataset3_prepared_X[:slice_point])
-trainning_data_Y = np.array(dataset3_prepared_Y[:slice_point])
-test_data_X = np.array(dataset3_prepared_X[slice_point:])
-test_data_Y = np.array(dataset3_prepared_Y[slice_point:])
+trainning_data_X = np.array(dataset3_prepared_X[:SLICE_POINT])
+trainning_data_Y = np.array(dataset3_prepared_Y[:SLICE_POINT])
+test_data_X = np.array(dataset3_prepared_X[SLICE_POINT:])
+test_data_Y = np.array(dataset3_prepared_Y[SLICE_POINT:])
 
 n = NeuralNetwork(EPOCHS, trainning_data_X, trainning_data_Y, LEARNING_RATE)
 n.train()
 n.test(test_data_X, test_data_Y)
 n.graph()
 
+input("Press any button to close")
 ############# DATA SET 3 LOGIC START #############

@@ -26,20 +26,15 @@ for num in range(0, dataset1_len):
     dataset1_prepared.append(x)
 
 
-# D1_MUTATION_RATE = 0.2  # must be between 0 and 1
-# D1_POP_SIZE = 100
-# D1_MAX_GEN = 200
-# D1_PERFECT_SCORE = 32
-# D1_GRAPH_NAME = "DATA SET 1"
-# D1_CHROMOSOME_LENGTH = 10
-
-# variables for dataset1
+# parameters for dataset2
 D1_MUTATION_RATE = 0.1  # must be between 0 and 1
 D1_POP_SIZE = 200
 D1_MAX_GEN = 200
+D1_CHROMOSOME_LENGTH = 5  # handles up to size 14 # 5 seems ideal
+
+# variables
 D1_PERFECT_SCORE = 32
 D1_GRAPH_NAME = "DATA SET 1"
-D1_CHROMOSOME_LENGTH = 5  # handles up to size 14 # 5 seems ideal
 
 p = Popultion(
     D1_MUTATION_RATE,
@@ -76,13 +71,15 @@ for num in range(0, dataset2_len):
     x = DataSet(input_np, output_val)
     dataset2_prepared.append(x)
 
-# variables for dataset2
+# parameters for dataset2
 D2_MUTATION_RATE = 0.1  # must be between 0 and 1
 D2_POP_SIZE = 100
 D2_MAX_GEN = 100
+D2_CHROMOSOME_LENGTH = 13
+
+# variables
 D2_PERFECT_SCORE = 64
 D2_GRAPH_NAME = "DATA SET 2"
-D2_CHROMOSOME_LENGTH = 13
 
 p2 = Popultion(
     D2_MUTATION_RATE,
@@ -99,3 +96,4 @@ p2.run_genetic_algorithm()
 print("DATA SET 2 - END")
 
 ############# DATA SET 2 LOGIC END #############
+input("Press any button to close")
